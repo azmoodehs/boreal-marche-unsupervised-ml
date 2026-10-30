@@ -1,0 +1,9 @@
+.ipynb_checkpoints/ 
+__pycache__/ 
+*.pyc 
+.env 
+.venv/ 
+venv/ 
+*.log 
+anaconda_projects/ 
+notebooks/01_mining-old.ipynb 

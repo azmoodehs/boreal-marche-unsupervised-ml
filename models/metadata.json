@@ -1,0 +1,13 @@
+{
+  "algorithm": "Apriori",
+  "library": "mlxtend",
+  "min_support": 0.005,
+  "min_confidence": 0.3,
+  "min_lift": 1.0,
+  "mining_date": "2026-10-29T20:26:37",
+  "number_of_rules": 22476,
+  "catalogue_products": 98,
+  "recommendable_products": 58,
+  "coverage_percent": 59.18,
+  "offline_mining": true
+}
