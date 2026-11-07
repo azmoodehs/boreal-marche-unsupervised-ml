@@ -432,11 +432,20 @@ if basket_items:
 else:
     st.markdown('<div class="muted-note">Your basket is empty · Explore popular picks to get started</div>', unsafe_allow_html=True)
 
-if recommendations:
-    display_items = [(item, get_product(item), rule) for item, rule in recommendations]
-else:
-    display_items = [(result["item"], result["product"], None) for result in popular_products(limit=5)]
+# Show up to five useful suggestions, while distinguishing association-rule
+# recommendations from popularity-based picks.
+display_items = [(item, get_product(item), rule) for item, rule in recommendations]
+already_displayed = {item for item, _, _ in display_items}
+if len(display_items) < 5:
+    for result in popular_products(limit=20):
+        item = result["item"]
+        if item not in already_displayed and item not in st.session_state.basket:
+            display_items.append((item, result["product"], None))
+            already_displayed.add(item)
+        if len(display_items) >= 5:
+            break
 
+st.caption(f"{len(recommendations)} association-based · {len(display_items) - len(recommendations)} popular picks")
 reco_cols = st.columns(3, gap="small")
 for index, (item, product, rule) in enumerate(display_items):
     if product is None:
