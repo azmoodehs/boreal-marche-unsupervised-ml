@@ -513,3 +513,25 @@ for index, (item, product, rule) in enumerate(display_items):
                     st.session_state.basket.append(item)
                     st.session_state.quantities[item] = 1
                 st.rerun()
+
+# Required by the project brief (Figure 4, page 7): auditable fired rules.
+if basket_items:
+    with st.expander(f"🔎 View rules that fired ({len(fired_rules)})"):
+        if not fired_rules:
+            st.caption("No rules fired for this basket.")
+        else:
+            fired_rows = [
+                {
+                    "Antecedent": ", ".join(rule["antecedents"]),
+                    "Consequent": ", ".join(rule["consequents"]),
+                    "Support": rule["support"],
+                    "Confidence": rule["confidence"],
+                    "Lift": rule["lift"],
+                }
+                for rule in fired_rules
+            ]
+            st.dataframe(
+                pd.DataFrame(fired_rows).sort_values("Lift", ascending=False),
+                use_container_width=True,
+                hide_index=True,
+            )
