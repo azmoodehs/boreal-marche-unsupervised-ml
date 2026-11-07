@@ -391,7 +391,7 @@ with shop_col:
                 )
                 already_added = item in st.session_state.basket
                 if st.button(
-                    "✓ In basket" if already_added else "＋ Add to basket",
+                    "✓ In basket" if already_added else "+ Add to basket",
                     key=f"catalogue_{item}", disabled=already_added,
                     use_container_width=True, type="secondary",
                 ):
@@ -508,7 +508,7 @@ for index, (item, product, rule) in enumerate(display_items):
                     st.write(explanation_text(rule, item))
             else:
                 st.caption("⭐ Popular choice")
-            if st.button("＋ Add to basket", key=f"recommendation_{item}", use_container_width=True):
+            if st.button("+ Add to basket", key=f"recommendation_{item}", use_container_width=True):
                 if item not in st.session_state.basket:
                     st.session_state.basket.append(item)
                     st.session_state.quantities[item] = 1
