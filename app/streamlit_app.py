@@ -156,6 +156,11 @@ metadata = load_metadata()
 
 if "basket" not in st.session_state:
     st.session_state.basket = []
+if "quantities" not in st.session_state:
+    st.session_state.quantities = {item: 1 for item in st.session_state.basket}
+# Preserve existing basket sessions if the app was refreshed after this update.
+for item in st.session_state.basket:
+    st.session_state.quantities.setdefault(item, 1)
 
 
 # -------------------------------------------------
@@ -391,6 +396,7 @@ with shop_col:
                     use_container_width=True, type="secondary",
                 ):
                     st.session_state.basket.append(item)
+                    st.session_state.quantities[item] = 1
                     st.rerun()
 
 with cart_col:
@@ -401,29 +407,51 @@ with cart_col:
             st.info("Your basket is empty. Add a product to get started.")
         else:
             total = 0.0
+            total_units = 0
             for item in list(basket_items):
                 product = get_product(item)
                 if product is None:
                     continue
                 price = float(product["Price"])
-                total += price
-                line_col, remove_col = st.columns([3.1, 1], vertical_alignment="center")
-                with line_col:
-                    st.markdown(
-                        f'<div class="cart-name">{escape(item)}</div>'
-                        f'<div class="cart-note">${price:.2f} · {escape(str(product["Category"]))}</div>',
-                        unsafe_allow_html=True,
-                    )
+                quantity = st.session_state.quantities.get(item, 1)
+                subtotal = price * quantity
+                total += subtotal
+                total_units += quantity
+                st.markdown(
+                    f'<div class="cart-name">{escape(item)}</div>'
+                    f'<div class="cart-note">${price:.2f} each · '
+                    f'<b>${subtotal:.2f}</b> subtotal</div>',
+                    unsafe_allow_html=True,
+                )
+                minus_col, qty_col, plus_col, remove_col = st.columns(
+                    [1, 1, 1, 1], gap="small", vertical_alignment="center"
+                )
+                with minus_col:
+                    if st.button("−", key=f"qty_minus_{item}", use_container_width=True):
+                        if quantity <= 1:
+                            st.session_state.basket.remove(item)
+                            st.session_state.quantities.pop(item, None)
+                        else:
+                            st.session_state.quantities[item] = quantity - 1
+                        st.rerun()
+                with qty_col:
+                    st.markdown(f"<div style='text-align:center;font-weight:750'>{quantity}</div>", unsafe_allow_html=True)
+                with plus_col:
+                    if st.button("+", key=f"qty_plus_{item}", use_container_width=True):
+                        st.session_state.quantities[item] = quantity + 1
+                        st.rerun()
                 with remove_col:
                     if st.button("✕", key=f"remove_{item}", help=f"Remove {item}", use_container_width=True):
                         st.session_state.basket.remove(item)
+                        st.session_state.quantities.pop(item, None)
                         st.rerun()
                 st.divider()
 
             st.metric("Basket total", f"${total:.2f}")
-            st.caption(f"{len(basket_items)} selected product(s)")
+            st.caption(f"{total_units} item(s) · {len(basket_items)} unique product(s)")
             if st.button("Clear basket", use_container_width=True):
                 st.session_state.basket = []
+                st.session_state.quantities = {}
                 st.rerun()
 
 st.divider()
@@ -483,6 +511,7 @@ for index, (item, product, rule) in enumerate(display_items):
             if st.button("＋ Add to basket", key=f"recommendation_{item}", use_container_width=True):
                 if item not in st.session_state.basket:
                     st.session_state.basket.append(item)
+                    st.session_state.quantities[item] = 1
                 st.rerun()
 
 if basket_items:
