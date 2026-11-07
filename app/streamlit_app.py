@@ -265,92 +265,93 @@ catalogue_col, basket_col, reco_col = st.columns(
 # =================================================
 
 with catalogue_col:
+    with st.container(border=True):
 
-    st.header("1 · Catalogue")
+        st.header("1 · Catalogue")
 
-    search = st.text_input(
-        "Search products"
-    )
-
-    categories = sorted(
-        products["Category"]
-        .dropna()
-        .unique()
-    )
-
-    category = st.selectbox(
-        "Category",
-        ["All"] + categories
-    )
-
-    filtered = products.copy()
-
-    if category != "All":
-        filtered = filtered[
-            filtered["Category"] == category
-        ]
-
-    if search:
-        mask = (
-            filtered["Item"]
-            .str.contains(
-                search,
-                case=False,
-                na=False
-            )
-            |
-            filtered["Item_EN"]
-            .str.contains(
-                search,
-                case=False,
-                na=False
-            )
+        search = st.text_input(
+            "Search products"
         )
 
-        filtered = filtered[mask]
+        categories = sorted(
+            products["Category"]
+            .dropna()
+            .unique()
+        )
 
-    st.caption(
-        f"{len(filtered)} product(s)"
-    )
+        category = st.selectbox(
+            "Category",
+            ["All"] + categories
+        )
 
-    for _, row in filtered.iterrows():
+        filtered = products.copy()
 
-        with st.container(
-            border=True
-        ):
+        if category != "All":
+            filtered = filtered[
+                filtered["Category"] == category
+            ]
 
-            st.markdown(
-                f"**{row['Item']}**"
+        if search:
+            mask = (
+                filtered["Item"]
+                .str.contains(
+                    search,
+                    case=False,
+                    na=False
+                )
+                |
+                filtered["Item_EN"]
+                .str.contains(
+                    search,
+                    case=False,
+                    na=False
+                )
             )
 
-            st.caption(
-                f"{row['Item_EN']} · "
-                f"{row['Category']}"
-            )
+            filtered = filtered[mask]
 
-            st.write(
-                f"${row['Price']:.2f}"
-            )
+        st.caption(
+            f"{len(filtered)} product(s)"
+        )
 
-            already_added = (
-                row["Item"]
-                in st.session_state.basket
-            )
+        for _, row in filtered.iterrows():
 
-            if st.button(
-                "Added ✓"
-                if already_added
-                else "Add",
-                key=f"add_{row['Item']}",
-                disabled=already_added,
-                use_container_width=True
+            with st.container(
+                border=True
             ):
 
-                st.session_state.basket.append(
-                    row["Item"]
+                st.markdown(
+                    f"**{row['Item']}**"
                 )
 
-                st.rerun()
+                st.caption(
+                    f"{row['Item_EN']} · "
+                    f"{row['Category']}"
+                )
+
+                st.write(
+                    f"${row['Price']:.2f}"
+                )
+
+                already_added = (
+                    row["Item"]
+                    in st.session_state.basket
+                )
+
+                if st.button(
+                    "Added ✓"
+                    if already_added
+                    else "Add",
+                    key=f"add_{row['Item']}",
+                    disabled=already_added,
+                    use_container_width=True
+                ):
+
+                    st.session_state.basket.append(
+                        row["Item"]
+                    )
+
+                    st.rerun()
 
 
 # =================================================
@@ -358,79 +359,80 @@ with catalogue_col:
 # =================================================
 
 with basket_col:
+    with st.container(border=True):
 
-    st.header("2 · Basket")
+        st.header("2 · Basket")
 
-    if not st.session_state.basket:
+        if not st.session_state.basket:
 
-        st.info(
-            "Your basket is empty."
-        )
-
-    else:
-
-        total = 0.0
-
-        for item in list(
-            st.session_state.basket
-        ):
-
-            product = get_product(
-                item
+            st.info(
+                "Your basket is empty."
             )
 
-            if product is None:
-                continue
+        else:
 
-            total += float(
-                product["Price"]
-            )
+            total = 0.0
 
-            with st.container(
-                border=True
+            for item in list(
+                st.session_state.basket
             ):
 
-                st.markdown(
-                    f"**{product['Item']}**"
+                product = get_product(
+                    item
                 )
 
-                st.caption(
-                    f"{product['Item_EN']} · "
-                    f"{product['Category']}"
+                if product is None:
+                    continue
+
+                total += float(
+                    product["Price"]
                 )
 
-                st.write(
-                    f"${product['Price']:.2f}"
-                )
-
-                if st.button(
-                    "Remove",
-                    key=f"remove_{item}",
-                    use_container_width=True
+                with st.container(
+                    border=True
                 ):
 
-                    st.session_state.basket.remove(
-                        item
+                    st.markdown(
+                        f"**{product['Item']}**"
                     )
 
-                    st.rerun()
+                    st.caption(
+                        f"{product['Item_EN']} · "
+                        f"{product['Category']}"
+                    )
 
-        st.divider()
+                    st.write(
+                        f"${product['Price']:.2f}"
+                    )
 
-        st.metric(
-            "Basket total",
-            f"${total:.2f}"
-        )
+                    if st.button(
+                        "Remove",
+                        key=f"remove_{item}",
+                        use_container_width=True
+                    ):
 
-        if st.button(
-            "Clear basket",
-            type="secondary",
-            use_container_width=True
-        ):
+                        st.session_state.basket.remove(
+                            item
+                        )
 
-            st.session_state.basket = []
+                        st.rerun()
 
-            st.rerun()
+            st.divider()
+
+            st.metric(
+                "Basket total",
+                f"${total:.2f}"
+            )
+
+            if st.button(
+                "Clear basket",
+                type="secondary",
+                use_container_width=True
+            ):
+
+                st.session_state.basket = []
+
+                st.rerun()
 
 
 # =================================================
@@ -438,76 +440,21 @@ with basket_col:
 # =================================================
 
 with reco_col:
+    with st.container(border=True):
 
-    st.header(
-        "3 · Recommendations"
-    )
-
-    basket_items = (
-        st.session_state.basket
-    )
-
-    if not basket_items:
-
-        st.info(
-            "Your basket is empty, so no association "
-            "rule can fire. Showing popular products instead."
+        st.header(
+            "3 · Recommendations"
         )
 
-        fallback = popular_products(
-            limit=5
+        basket_items = (
+            st.session_state.basket
         )
 
-        for result in fallback:
+        if not basket_items:
 
-            product = result["product"]
-
-            with st.container(
-                border=True
-            ):
-
-                st.subheader(
-                    product["Item"]
-                )
-
-                st.caption(
-                    f"{product['Item_EN']} · "
-                    f"{product['Category']}"
-                )
-
-                st.write(
-                    f"${product['Price']:.2f}"
-                )
-
-                st.caption(
-                    "Popular-product fallback "
-                    "(cold start)"
-                )
-
-                already_added = product["Item"] in st.session_state.basket
-                if st.button(
-                    "Added ✓" if already_added else "Add to Basket",
-                    key=f"reco_cold_{product['Item']}",
-                    disabled=already_added,
-                    use_container_width=True
-                ):
-                    st.session_state.basket.append(product["Item"])
-                    st.rerun()
-
-    else:
-
-        recommendations, fired_rules = (
-            find_recommendations(
-                basket_items
-            )
-        )
-
-        if not recommendations:
-
-            st.warning(
-                "No association rule matches "
-                "the current basket. "
-                "Showing popular products instead."
+            st.info(
+                "Your basket is empty, so no association "
+                "rule can fire. Showing popular products instead."
             )
 
             fallback = popular_products(
@@ -516,9 +463,7 @@ with reco_col:
 
             for result in fallback:
 
-                product = (
-                    result["product"]
-                )
+                product = result["product"]
 
                 with st.container(
                     border=True
@@ -538,13 +483,14 @@ with reco_col:
                     )
 
                     st.caption(
-                        "Fallback recommendation"
+                        "Popular-product fallback "
+                        "(cold start)"
                     )
 
                     already_added = product["Item"] in st.session_state.basket
                     if st.button(
                         "Added ✓" if already_added else "Add to Basket",
-                        key=f"reco_fallback_{product['Item']}",
+                        key=f"reco_cold_{product['Item']}",
                         disabled=already_added,
                         use_container_width=True
                     ):
@@ -553,141 +499,198 @@ with reco_col:
 
         else:
 
-            for item, rule in recommendations:
+            recommendations, fired_rules = (
+                find_recommendations(
+                    basket_items
+                )
+            )
 
-                product = get_product(
-                    item
+            if not recommendations:
+
+                st.warning(
+                    "No association rule matches "
+                    "the current basket. "
+                    "Showing popular products instead."
                 )
 
-                if product is None:
-                    continue
-
-                strength = (
-                    strength_label(
-                        rule["lift"]
-                    )
+                fallback = popular_products(
+                    limit=5
                 )
 
-                with st.container(
-                    border=True
-                ):
+                for result in fallback:
 
-                    st.subheader(
-                        product["Item"]
+                    product = (
+                        result["product"]
                     )
 
-                    st.caption(
-                        f"{product['Item_EN']} · "
-                        f"{product['Category']} · "
-                        f"${product['Price']:.2f}"
-                    )
-
-                    st.markdown(
-                        f"**Strength:** {strength}"
-                    )
-
-                    st.write(
-                        explanation_text(
-                            rule,
-                            item
-                        )
-                    )
-
-                    metric_col1, metric_col2, metric_col3 = (
-                        st.columns(3)
-                    )
-
-                    metric_col1.metric(
-                        "Support",
-                        f"{rule['support']:.3f}"
-                    )
-
-                    metric_col2.metric(
-                        "Confidence",
-                        f"{rule['confidence']:.1%}"
-                    )
-
-                    metric_col3.metric(
-                        "Lift",
-                        f"{rule['lift']:.2f}"
-                    )
-
-                    already_added = product["Item"] in st.session_state.basket
-                    if st.button(
-                        "Added ✓" if already_added else "Add to Basket",
-                        key=f"reco_rule_{product['Item']}",
-                        disabled=already_added,
-                        use_container_width=True
+                    with st.container(
+                        border=True
                     ):
-                        st.session_state.basket.append(product["Item"])
-                        st.rerun()
 
-        # -----------------------------------------
-        # Auditability
-        # -----------------------------------------
+                        st.subheader(
+                            product["Item"]
+                        )
 
-        with st.expander(
-            "Rules that fired"
-        ):
+                        st.caption(
+                            f"{product['Item_EN']} · "
+                            f"{product['Category']}"
+                        )
 
-            if not fired_rules:
+                        st.write(
+                            f"${product['Price']:.2f}"
+                        )
 
-                st.write(
-                    "No rules fired."
-                )
+                        st.caption(
+                            "Fallback recommendation"
+                        )
+
+                        already_added = product["Item"] in st.session_state.basket
+                        if st.button(
+                            "Added ✓" if already_added else "Add to Basket",
+                            key=f"reco_fallback_{product['Item']}",
+                            disabled=already_added,
+                            use_container_width=True
+                        ):
+                            st.session_state.basket.append(product["Item"])
+                            st.rerun()
 
             else:
 
-                fired_rows = []
+                for item, rule in recommendations:
 
-                for rule in fired_rules:
-
-                    fired_rows.append(
-                        {
-                            "Antecedent":
-                                ", ".join(
-                                    rule[
-                                        "antecedents"
-                                    ]
-                                ),
-
-                            "Consequent":
-                                ", ".join(
-                                    rule[
-                                        "consequents"
-                                    ]
-                                ),
-
-                            "Support":
-                                rule["support"],
-
-                            "Confidence":
-                                rule[
-                                    "confidence"
-                                ],
-
-                            "Lift":
-                                rule["lift"]
-                        }
+                    product = get_product(
+                        item
                     )
 
-                fired_df = pd.DataFrame(
-                    fired_rows
-                )
+                    if product is None:
+                        continue
 
-                fired_df = (
-                    fired_df
-                    .sort_values(
-                        "Lift",
-                        ascending=False
+                    strength = (
+                        strength_label(
+                            rule["lift"]
+                        )
                     )
-                )
 
-                st.dataframe(
-                    fired_df,
-                    use_container_width=True,
-                    hide_index=True
-                )
+                    with st.container(
+                        border=True
+                    ):
+
+                        st.subheader(
+                            product["Item"]
+                        )
+
+                        st.caption(
+                            f"{product['Item_EN']} · "
+                            f"{product['Category']} · "
+                            f"${product['Price']:.2f}"
+                        )
+
+                        st.markdown(
+                            f"**Strength:** {strength}"
+                        )
+
+                        st.write(
+                            explanation_text(
+                                rule,
+                                item
+                            )
+                        )
+
+                        metric_col1, metric_col2, metric_col3 = (
+                            st.columns(3)
+                        )
+
+                        metric_col1.metric(
+                            "Support",
+                            f"{rule['support']:.3f}"
+                        )
+
+                        metric_col2.metric(
+                            "Confidence",
+                            f"{rule['confidence']:.1%}"
+                        )
+
+                        metric_col3.metric(
+                            "Lift",
+                            f"{rule['lift']:.2f}"
+                        )
+
+                        already_added = product["Item"] in st.session_state.basket
+                        if st.button(
+                            "Added ✓" if already_added else "Add to Basket",
+                            key=f"reco_rule_{product['Item']}",
+                            disabled=already_added,
+                            use_container_width=True
+                        ):
+                            st.session_state.basket.append(product["Item"])
+                            st.rerun()
+
+            # -----------------------------------------
+            # Auditability
+            # -----------------------------------------
+
+            with st.expander(
+                "Rules that fired"
+            ):
+
+                if not fired_rules:
+
+                    st.write(
+                        "No rules fired."
+                    )
+
+                else:
+
+                    fired_rows = []
+
+                    for rule in fired_rules:
+
+                        fired_rows.append(
+                            {
+                                "Antecedent":
+                                    ", ".join(
+                                        rule[
+                                            "antecedents"
+                                        ]
+                                    ),
+
+                                "Consequent":
+                                    ", ".join(
+                                        rule[
+                                            "consequents"
+                                        ]
+                                    ),
+
+                                "Support":
+                                    rule["support"],
+
+                                "Confidence":
+                                    rule[
+                                        "confidence"
+                                    ],
+
+                                "Lift":
+                                    rule["lift"]
+                            }
+                        )
+
+                    fired_df = pd.DataFrame(
+                        fired_rows
+                    )
+
+                    fired_df = (
+                        fired_df
+                        .sort_values(
+                            "Lift",
+                            ascending=False
+                        )
+                    )
+
+                    st.dataframe(
+                        fired_df,
+                        use_container_width=True,
+                        hide_index=True
+                    )
 
 
 # -------------------------------------------------
