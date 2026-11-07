@@ -437,7 +437,7 @@ with cart_col:
                 with qty_col:
                     st.markdown(f"<div style='text-align:center;font-weight:750'>{quantity}</div>", unsafe_allow_html=True)
                 with plus_col:
-                    if st.button("+", key=f"qty_plus_{item}", use_container_width=True):
+                    if st.button("＋", key=f"qty_plus_{item}", help=f"Increase quantity of {item}", use_container_width=True):
                         st.session_state.quantities[item] = quantity + 1
                         st.rerun()
                 with remove_col:
