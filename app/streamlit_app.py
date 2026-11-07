@@ -505,5 +505,4 @@ if basket_items:
                 use_container_width=True, hide_index=True,
             )
 
-with st.expander("ℹ️ Model information"):
-    st.json(metadata)
+
