@@ -32,6 +32,16 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+      /* Remove Streamlit's fixed header, which obscures the storefront */
+      header[data-testid="stHeader"], [data-testid="stHeader"],
+      [data-testid="stToolbar"], [data-testid="stDecoration"],
+      [data-testid="stStatusWidget"], [data-testid="stDeployButton"] {
+          display: none !important;
+          visibility: hidden !important;
+          height: 0 !important;
+      }
+      #MainMenu, footer {visibility: hidden !important;}
+      [data-testid="stAppViewContainer"] > .main {padding-top: 0 !important;}
       [data-testid="stToolbar"],
       [data-testid="stDecoration"],
       [data-testid="stStatusWidget"] {
