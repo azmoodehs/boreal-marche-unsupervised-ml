@@ -32,6 +32,11 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+      [data-testid="stToolbar"],
+      [data-testid="stDecoration"],
+      [data-testid="stStatusWidget"] {
+          display: none !important;
+      }
       .stApp {background: #f8faf7;}
       .block-container {max-width: 1480px; padding-top: 1.2rem; padding-bottom: 3rem;}
       h1,h2,h3 {letter-spacing: -.025em !important;}
