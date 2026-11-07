@@ -484,6 +484,16 @@ with reco_col:
                     "(cold start)"
                 )
 
+                already_added = product["Item"] in st.session_state.basket
+                if st.button(
+                    "Added ✓" if already_added else "Add to Basket",
+                    key=f"reco_cold_{product['Item']}",
+                    disabled=already_added,
+                    use_container_width=True
+                ):
+                    st.session_state.basket.append(product["Item"])
+                    st.rerun()
+
     else:
 
         recommendations, fired_rules = (
@@ -530,6 +540,16 @@ with reco_col:
                     st.caption(
                         "Fallback recommendation"
                     )
+
+                    already_added = product["Item"] in st.session_state.basket
+                    if st.button(
+                        "Added ✓" if already_added else "Add to Basket",
+                        key=f"reco_fallback_{product['Item']}",
+                        disabled=already_added,
+                        use_container_width=True
+                    ):
+                        st.session_state.basket.append(product["Item"])
+                        st.rerun()
 
         else:
 
@@ -591,6 +611,16 @@ with reco_col:
                         "Lift",
                         f"{rule['lift']:.2f}"
                     )
+
+                    already_added = product["Item"] in st.session_state.basket
+                    if st.button(
+                        "Added ✓" if already_added else "Add to Basket",
+                        key=f"reco_rule_{product['Item']}",
+                        disabled=already_added,
+                        use_container_width=True
+                    ):
+                        st.session_state.basket.append(product["Item"])
+                        st.rerun()
 
         # -----------------------------------------
         # Auditability
