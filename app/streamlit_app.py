@@ -28,8 +28,34 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🛒 Boréal Marché")
-st.caption("Association-rule recommendation engine using Apriori")
+st.markdown(
+    """
+    <style>
+      .block-container {padding-top: 1.6rem; max-width: 1500px; padding-bottom: 2.5rem;}
+      h1 {font-size: 2rem !important; letter-spacing: -.04em; margin-bottom: .2rem;}
+      h2 {font-size: 1.1rem !important; letter-spacing: -.02em; padding: 0 !important;}
+      h3 {font-size: 1rem !important; padding: 0 !important;}
+      div[data-testid="stVerticalBlockBorderWrapper"] {
+        border-radius: 12px;
+      }
+      div[data-testid="stMetric"] {padding: .1rem 0;}
+      div[data-testid="stMetricLabel"] {font-size: .72rem;}
+      div[data-testid="stMetricValue"] {font-size: 1.1rem;}
+      .app-kicker {font-size:.78rem; font-weight:700; letter-spacing:.12em; color:#13856a;}
+      .app-subtitle {color: gray; font-size:.89rem; margin-top:.1rem; margin-bottom:1.2rem;}
+      .reco-name {font-weight:700; font-size:.98rem; letter-spacing:-.015em;}
+      .reco-meta {font-size:.8rem; opacity:.78; margin-top:.12rem;}
+      .reco-metrics {font-size:.8rem; opacity:.85; margin:.35rem 0 .5rem;}
+      .reco-metrics b {color:#16816a;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown('<div class="app-kicker">BORÉAL MARCHÉ / SMART SHOPPING</div>', unsafe_allow_html=True)
+st.title("Shopping recommendations")
+st.markdown('<div class="app-subtitle">Discover products frequently bought together · Powered by Apriori</div>', unsafe_allow_html=True)
+
 
 
 # -------------------------------------------------
@@ -255,8 +281,8 @@ def explanation_text(
 # -------------------------------------------------
 
 catalogue_col, basket_col, reco_col = st.columns(
-    [1.15, 0.9, 1.35],
-    gap="large"
+    [1.1, 1.0, 1.1],
+    gap="medium"
 )
 
 
@@ -267,7 +293,7 @@ catalogue_col, basket_col, reco_col = st.columns(
 with catalogue_col:
     with st.container(border=True):
 
-        st.header("1 · Catalogue")
+        st.subheader("01  ·  Catalogue")
 
         search = st.text_input(
             "Search products"
@@ -361,7 +387,7 @@ with catalogue_col:
 with basket_col:
     with st.container(border=True):
 
-        st.header("2 · Basket")
+        st.subheader("02  ·  Basket")
 
         if not st.session_state.basket:
 
@@ -442,188 +468,69 @@ with basket_col:
 with reco_col:
     with st.container(border=True):
 
-        st.header(
-            "3 · Recommendations"
-        )
+        st.subheader("03  ·  Recommendations")
 
         basket_items = (
             st.session_state.basket
         )
 
         if not basket_items:
-
-            st.info(
-                "Your basket is empty, so no association "
-                "rule can fire. Showing popular products instead."
-            )
-
-            fallback = popular_products(
-                limit=5
-            )
-
+            st.caption("Start with a suggestion or search the catalogue.")
+            fallback = popular_products(limit=5)
             for result in fallback:
-
+                item = result["item"]
                 product = result["product"]
-
-                with st.container(
-                    border=True
-                ):
-
-                    st.subheader(
-                        product["Item"]
-                    )
-
-                    st.caption(
-                        f"{product['Item_EN']} · "
-                        f"{product['Category']}"
-                    )
-
-                    st.write(
-                        f"${product['Price']:.2f}"
-                    )
-
-                    st.caption(
-                        "Popular-product fallback "
-                        "(cold start)"
-                    )
-
-                    already_added = product["Item"] in st.session_state.basket
-                    if st.button(
-                        "Added ✓" if already_added else "Add to Basket",
-                        key=f"reco_cold_{product['Item']}",
-                        disabled=already_added,
-                        use_container_width=True
-                    ):
-                        st.session_state.basket.append(product["Item"])
-                        st.rerun()
-
-        else:
-
-            recommendations, fired_rules = (
-                find_recommendations(
-                    basket_items
-                )
-            )
-
-            if not recommendations:
-
-                st.warning(
-                    "No association rule matches "
-                    "the current basket. "
-                    "Showing popular products instead."
-                )
-
-                fallback = popular_products(
-                    limit=5
-                )
-
-                for result in fallback:
-
-                    product = (
-                        result["product"]
-                    )
-
-                    with st.container(
-                        border=True
-                    ):
-
-                        st.subheader(
-                            product["Item"]
-                        )
-
-                        st.caption(
-                            f"{product['Item_EN']} · "
-                            f"{product['Category']}"
-                        )
-
-                        st.write(
-                            f"${product['Price']:.2f}"
-                        )
-
-                        st.caption(
-                            "Fallback recommendation"
-                        )
-
-                        already_added = product["Item"] in st.session_state.basket
-                        if st.button(
-                            "Added ✓" if already_added else "Add to Basket",
-                            key=f"reco_fallback_{product['Item']}",
-                            disabled=already_added,
-                            use_container_width=True
-                        ):
-                            st.session_state.basket.append(product["Item"])
+                with st.container(border=True):
+                    name_col, action_col = st.columns([2.3, 1], gap="small", vertical_alignment="center")
+                    with name_col:
+                        st.markdown(f"**{item}**")
+                        st.caption(f"{product['Category']} · ${product['Price']:.2f} · Popular pick")
+                    with action_col:
+                        if st.button("＋ Add", key=f"reco_cold_{item}", use_container_width=True):
+                            if item not in st.session_state.basket:
+                                st.session_state.basket.append(item)
                             st.rerun()
-
+        else:
+            recommendations, fired_rules = find_recommendations(basket_items)
+            if not recommendations:
+                st.caption("No matching association rule · Showing popular picks")
+                for result in popular_products(limit=5):
+                    item = result["item"]
+                    product = result["product"]
+                    with st.container(border=True):
+                        name_col, action_col = st.columns([2.3, 1], gap="small", vertical_alignment="center")
+                        with name_col:
+                            st.markdown(f"**{item}**")
+                            st.caption(f"{product['Category']} · ${product['Price']:.2f} · Popular pick")
+                        with action_col:
+                            if st.button("＋ Add", key=f"reco_fallback_{item}", use_container_width=True):
+                                if item not in st.session_state.basket:
+                                    st.session_state.basket.append(item)
+                                st.rerun()
             else:
-
+                st.caption("Ranked by association strength (Lift)")
                 for item, rule in recommendations:
-
-                    product = get_product(
-                        item
-                    )
-
+                    product = get_product(item)
                     if product is None:
                         continue
-
-                    strength = (
-                        strength_label(
-                            rule["lift"]
-                        )
-                    )
-
-                    with st.container(
-                        border=True
-                    ):
-
-                        st.subheader(
-                            product["Item"]
-                        )
-
-                        st.caption(
-                            f"{product['Item_EN']} · "
-                            f"{product['Category']} · "
-                            f"${product['Price']:.2f}"
-                        )
-
+                    with st.container(border=True):
+                        name_col, action_col = st.columns([2.3, 1], gap="small", vertical_alignment="center")
+                        with name_col:
+                            st.markdown(f"**{item}**")
+                            st.caption(f"{product['Category']} · ${product['Price']:.2f} · {strength_label(rule['lift'])}")
+                        with action_col:
+                            if st.button("＋ Add", key=f"reco_rule_{item}", use_container_width=True):
+                                if item not in st.session_state.basket:
+                                    st.session_state.basket.append(item)
+                                st.rerun()
                         st.markdown(
-                            f"**Strength:** {strength}"
+                            f'<div class="reco-metrics"><b>Lift {rule["lift"]:.2f}×</b>'
+                            f' &nbsp; · &nbsp; Confidence {rule["confidence"]:.0%}'
+                            f' &nbsp; · &nbsp; Support {rule["support"]:.3f}</div>',
+                            unsafe_allow_html=True,
                         )
-
-                        st.write(
-                            explanation_text(
-                                rule,
-                                item
-                            )
-                        )
-
-                        metric_col1, metric_col2, metric_col3 = (
-                            st.columns(3)
-                        )
-
-                        metric_col1.metric(
-                            "Support",
-                            f"{rule['support']:.3f}"
-                        )
-
-                        metric_col2.metric(
-                            "Confidence",
-                            f"{rule['confidence']:.1%}"
-                        )
-
-                        metric_col3.metric(
-                            "Lift",
-                            f"{rule['lift']:.2f}"
-                        )
-
-                        already_added = product["Item"] in st.session_state.basket
-                        if st.button(
-                            "Added ✓" if already_added else "Add to Basket",
-                            key=f"reco_rule_{product['Item']}",
-                            disabled=already_added,
-                            use_container_width=True
-                        ):
-                            st.session_state.basket.append(product["Item"])
-                            st.rerun()
+                        with st.expander("Why this recommendation?"):
+                            st.write(explanation_text(rule, item))
 
             # -----------------------------------------
             # Auditability
